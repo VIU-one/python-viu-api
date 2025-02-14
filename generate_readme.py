@@ -30,9 +30,18 @@ Generated automatically from .proto files using GitHub Actions.
 
 def extract_proto_info():
     """Parses the generated BetterProto Python file to extract service, request types, and methods."""
+    
+    # Ensure the 'generated' directory exists
+    if not os.path.exists("generated"):
+        print("Error: 'generated/' directory does not exist.")
+        return None, None, None, None, None
+
     proto_files = [f for f in os.listdir("generated") if f.endswith(".py") and not f.startswith("__")]
+
+    # If no Python files are found
     if not proto_files:
-        return None, None, None, None
+        print("Error: No generated BetterProto files found in 'generated/'.")
+        return None, None, None, None, None
 
     with open(os.path.join("generated", proto_files[0]), "r") as f:
         content = f.read()
@@ -40,14 +49,17 @@ def extract_proto_info():
     service_match = re.search(r"class (\w+)Stub\(betterproto\.ServiceStub\):", content)
     request_matches = re.findall(r"async def (\w+)\(self, request: (\w+)", content)
 
+    # If no service class or methods are found
     if not service_match or not request_matches:
-        return None, None, None, None
+        print("Error: No gRPC service or methods found in the generated BetterProto file.")
+        return None, None, None, None, None
 
     service_name = service_match.group(1)
     method_name, request_type = request_matches[0]  # Take the first method for example usage
     methods_list = "\n".join([f"- {method}({req})" for method, req in request_matches])
     
     return service_name, proto_files[0].replace(".py", ""), method_name, request_type, methods_list
+
 
 def main():
     service_name, service_import, method_name, request_type, methods_list = extract_proto_info()
