@@ -36,6 +36,8 @@ def extract_proto_info():
         print("Error: 'generated/' directory does not exist.")
         return None, None, None, None, None
 
+    print("Found generated files:", os.listdir("generated"))
+
     proto_files = [f for f in os.listdir("generated") if f.endswith(".py") and not f.startswith("__")]
 
     # If no Python files are found
