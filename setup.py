@@ -1,8 +1,10 @@
 from setuptools import setup, find_packages
 
+version = os.getenv("PACKAGE_VERSION", "0.1.0")
+
 setup(
     name="python_viu_api",
-    version="0.1.0",
+    version=version,
     packages=find_packages(include=["generated", "generated.*"]),
     install_requires=[
         "grpcio",
