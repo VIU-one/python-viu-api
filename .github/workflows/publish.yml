@@ -31,3 +31,24 @@ jobs:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: twine upload dist/*
+        
+  generate-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: pip install betterproto grpcio grpcio-tools
+
+      - name: Generate README
+        run: python generate_readme.py
+
+      - name: Commit and Push README
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git add README.md
+          git commit -m "Auto-update README with BetterProto client docs" || echo "No changes to commit"
+          git push origin main
