@@ -10,7 +10,7 @@ setup(
         "betterproto[compiler]"
     ],
     author="Michael Weber",
-    author_email="Michael Weber",
+    author_email="info@searchviu.com",
     description="gRPC client for VIU API",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
