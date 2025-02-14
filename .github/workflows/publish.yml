@@ -40,8 +40,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Ensure all branches and history are available
+
+      - name: Switch to Main Branch
+        run: |
+          git checkout main
+          git pull origin main  # Ensure the latest changes
+
 
       - name: Install Dependencies
         run: pip install betterproto grpcio grpcio-tools
