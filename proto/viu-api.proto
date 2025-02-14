@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package viuapi;
+
+import "jinaembed.proto";
+
+
+service ApiService {
+  rpc EmbedNVEmbedV2 (EmbedNVEmbedV2Request) returns (EmbedNVEmbedV2Response);
+  rpc EmbedBGEGemma2 (EmbedBGEGemma2Request) returns (EmbedBGEGemma2Response);
+  rpc EmbedJinaEmbeddingsV3 (JinaEmbedRequest) returns (JinaEmbedReply);
+}
+
+message EmbedNVEmbedV2Request {
+  string text = 1;
+}
+message EmbedNVEmbedV2Response {
+  repeated float embedding = 1;
+}
+
+message EmbedBGEGemma2Request {
+  string text = 1;
+}
+message EmbedBGEGemma2Response {
+  repeated float embedding = 1; // array of numbers
+}
+
