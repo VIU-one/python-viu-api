@@ -13,6 +13,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Extract Version from Tag
+        run: echo "PACKAGE_VERSION=$(echo ${GITHUB_REF#refs/tags/live-})" >> $GITHUB_ENV
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -24,7 +27,8 @@ jobs:
           pip install twine
 
       - name: Build package
-        run: python setup.py sdist bdist_wheel
+        run: |
+          python setup.py sdist bdist_wheel
 
       - name: Publish to PyPI
         env:
@@ -43,7 +47,8 @@ jobs:
         run: pip install betterproto grpcio grpcio-tools
 
       - name: Generate README
-        run: python generate_readme.py
+        run:  mkdir -p generated |
+          python generate_readme.py
 
       - name: Commit and Push README
         run: |
