@@ -64,6 +64,8 @@ jobs:
         run: |
           mkdir -p generated
           python -m grpc_tools.protoc -Iproto --python_betterproto_out=generated proto/*.proto
+          touch generated/__init__.py  # Ensure it's a valid Python package
+
 
       - name: Generate API Documentation as README.md
         run: |
