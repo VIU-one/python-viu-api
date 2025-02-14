@@ -62,6 +62,8 @@ jobs:
         run: |
           mkdir -p generated  # Create directory if it doesn't exist
           python -m grpc_tools.protoc -Iproto --python_betterproto_out=generated proto/*.proto
+          ls -l generated/
+          cat generated/*.py | grep -A 5 "class "
 
       - name: Generate README
         run: python generate_readme.py
