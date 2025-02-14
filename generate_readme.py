@@ -15,7 +15,7 @@ from generated.{service_import} import {service_name}Stub, {request_type}
 
 async def main():
     client = {service_name}Stub("your.api.endpoint:443")
-    request = {request_type}(param="value")
+    request = {request_type}(text="Your text here")  # Adjust based on method params
     response = await client.{method_name}(request)
     print(response)
 
@@ -36,8 +36,6 @@ def extract_proto_info():
         print("Error: 'generated/' directory does not exist.")
         return None, None, None, None, None
 
-    print("Found generated files:", os.listdir("generated"))
-
     proto_files = [f for f in os.listdir("generated") if f.endswith(".py") and not f.startswith("__")]
 
     # If no Python files are found
@@ -45,22 +43,39 @@ def extract_proto_info():
         print("Error: No generated BetterProto files found in 'generated/'.")
         return None, None, None, None, None
 
+    # Debug: Print the files found
+    print("Found generated files:", proto_files)
+
     with open(os.path.join("generated", proto_files[0]), "r") as f:
         content = f.read()
 
+    # Debug: Print a portion of the content to verify format
+    print("Generated file content preview:\n", content[:500])
+
+    # Updated regex to correctly match BetterProto service classes
     service_match = re.search(r"class (\w+)Stub\(betterproto\.ServiceStub\):", content)
-    request_matches = re.findall(r"async def (\w+)\(self, request: (\w+)", content)
+    request_matches = re.findall(r"async def (\w+)\(self, \*.*,? (\w+):.*?\) -> (\w+):", content)
+
+    # Debug: Print matches
+    if service_match:
+        print("Found gRPC Service Class:", service_match.group(1))
+    else:
+        print("Error: No gRPC service class found.")
+
+    if request_matches:
+        print("Found RPC Methods:", request_matches)
+    else:
+        print("Error: No gRPC methods found.")
 
     # If no service class or methods are found
     if not service_match or not request_matches:
-        print("Error: No gRPC service or methods found in the generated BetterProto file.")
         return None, None, None, None, None
 
     service_name = service_match.group(1)
-    method_name, request_type = request_matches[0]  # Take the first method for example usage
-    methods_list = "\n".join([f"- {method}({req})" for method, req in request_matches])
+    first_method, first_request, first_response = request_matches[0]  # Take the first method for example usage
+    methods_list = "\n".join([f"- {method}({req}) -> {resp}" for method, req, resp in request_matches])
     
-    return service_name, proto_files[0].replace(".py", ""), method_name, request_type, methods_list
+    return service_name, proto_files[0].replace(".py", ""), first_method, first_request, methods_list
 
 
 def main():
