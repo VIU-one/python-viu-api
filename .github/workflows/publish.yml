@@ -65,7 +65,12 @@ jobs:
           mkdir -p generated
           python -m grpc_tools.protoc -Iproto --python_betterproto_out=generated proto/*.proto
           touch generated/__init__.py  # Ensure it's a valid Python package
+      
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$(pwd):$(pwd)/generated" >> $GITHUB_ENV
 
+      - name: Debug - Check if 'generated' is Importable
+        run: python -c "import generated; print('Generated module is importable!')"
 
       - name: Generate API Documentation as README.md
         run: |
