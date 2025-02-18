@@ -28,7 +28,8 @@ jobs:
 
       - name: Generate gRPC Code
         run: |
-          python -m grpc_tools.protoc -Iproto --python_betterproto_out=. proto/*.proto
+          python -m grpc_tools.protoc -Iproto --python_betterproto_out=. proto/jinaembed.proto proto/viu-api.proto  #Important: List jinaembed.proto first
+          touch __init__.py  # Ensure it's a valid Python package
 
       - name: Build package
         run: python setup.py sdist bdist_wheel
@@ -61,7 +62,7 @@ jobs:
 
       - name: Generate gRPC Code
         run: |
-          python -m grpc_tools.protoc -Iproto --python_betterproto_out=. proto/*.proto
+          python -m grpc_tools.protoc -Iproto --python_betterproto_out=. proto/jinaembed.proto proto/viu-api.proto  #Important: List jinaembed.proto first
           touch __init__.py  # Ensure it's a valid Python package
       
       - name: Set PYTHONPATH
