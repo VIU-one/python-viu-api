@@ -2,6 +2,6 @@
 
 ## Generated gRPC API
 ```python
-<a id="generated"></a>
-# generated
+<a id="viuapi"></a>
+# viuapi
 ```
