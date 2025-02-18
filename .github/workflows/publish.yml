@@ -24,15 +24,27 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel
-          pip install twine "betterproto[compiler]" betterproto grpcio grpcio-tools grpcio-tools
+          pip install twine "betterproto[compiler]" betterproto grpcio grpcio-tools
+
+      - name: Create Package Directories
+        run: |
+          mkdir -p viuapi
+          mkdir -p jinaembed
 
       - name: Generate gRPC Code
         run: |
-          python -m grpc_tools.protoc -Iproto --python_betterproto_out=. proto/jinaembed.proto proto/viu-api.proto  #Important: List jinaembed.proto first
-          touch __init__.py  # Ensure it's a valid Python package
+          python -m grpc_tools.protoc -Iproto --python_betterproto_out=viuapi proto/viu-api.proto
+          python -m grpc_tools.protoc -Iproto --python_betterproto_out=jinaembed proto/jinaembed.proto
+          touch viuapi/__init__.py
+          touch jinaembed/__init__.py
+
+      - name: Move generated files to root and rename
+        run: |
+          mv viuapi/viuapi.py .
+          mv jinaembed/jinaembed.py .
 
       - name: Build package
-        run: python setup.py sdist bdist_wheel
+        run: python setup.py sdist bdist_wheel  # Assuming you have a setup.py
 
       - name: Publish to PyPI
         env:
@@ -42,31 +54,43 @@ jobs:
 
   generate-readme:
     runs-on: ubuntu-latest
-    needs: deploy  # Ensures `deploy` completes first
+    needs: deploy
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Ensure full history is available
+          fetch-depth: 0
 
       - name: Switch to Main Branch
         run: |
           git checkout main
-          git pull origin main  # Ensure latest changes
+          git pull origin main
 
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install "betterproto[compiler]" betterproto grpcio grpcio-tools grpcio-tools pydoc-markdown
+          pip install "betterproto[compiler]" betterproto grpcio grpcio-tools pydoc-markdown
+
+      - name: Create Package Directories
+        run: |
+          mkdir -p viuapi
+          mkdir -p jinaembed
 
       - name: Generate gRPC Code
         run: |
-          python -m grpc_tools.protoc -Iproto --python_betterproto_out=. proto/jinaembed.proto proto/viu-api.proto  #Important: List jinaembed.proto first
-          touch __init__.py  # Ensure it's a valid Python package
-      
+          python -m grpc_tools.protoc -Iproto --python_betterproto_out=viuapi proto/viu-api.proto
+          python -m grpc_tools.protoc -Iproto --python_betterproto_out=jinaembed proto/jinaembed.proto
+          touch viuapi/__init__.py
+          touch jinaembed/__init__.py
+
+      - name: Move generated files to root and rename
+        run: |
+          mv viuapi/viuapi.py .
+          mv jinaembed/jinaembed.py .
+
       - name: Set PYTHONPATH
-        run: echo "PYTHONPATH=$(pwd):$(pwd)" >> $GITHUB_ENV
+        run: echo "PYTHONPATH=.:$PYTHONPATH" >> $GITHUB_ENV
 
       - name: Debug - Check if 'generated' is Importable
         run: python -c "import viuapi; print('Generated module is importable!')"
@@ -78,7 +102,7 @@ jobs:
           echo "## Generated gRPC API" >> README.md
           echo '```python' >> README.md
           pydoc-markdown --module viuapi > tmp.md
-          cat tmp.md | sed '/^ *$/d' >> README.md  # Remove empty lines
+          cat tmp.md | sed '/^ *$/d' >> README.md
           echo '```' >> README.md
           rm tmp.md
 
