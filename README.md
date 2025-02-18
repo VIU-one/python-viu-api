@@ -1,7 +1,9 @@
 # API Documentation
 
 ## Generated gRPC API
-```python
+```
+# Table of Contents
+* [viuapi](#viuapi)
 <a id="viuapi"></a>
 # viuapi
 ```
