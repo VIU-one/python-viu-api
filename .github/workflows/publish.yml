@@ -26,10 +26,9 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           pip install twine "betterproto[compiler]" betterproto grpcio grpcio-tools grpcio-tools
 
-      - name: Generate gRPC Code (Ensure 'generated/' Exists)
+      - name: Generate gRPC Code
         run: |
-          mkdir -p generated  # Create directory if it doesn't exist
-          python -m grpc_tools.protoc -Iproto --python_betterproto_out=generated proto/*.proto
+          python -m grpc_tools.protoc -Iproto --python_betterproto_out=. proto/*.proto
 
       - name: Build package
         run: python setup.py sdist bdist_wheel
@@ -60,17 +59,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install "betterproto[compiler]" betterproto grpcio grpcio-tools grpcio-tools pydoc-markdown
 
-      - name: Generate gRPC Code (Ensure 'generated/' Exists)
+      - name: Generate gRPC Code
         run: |
-          mkdir -p generated
-          python -m grpc_tools.protoc -Iproto --python_betterproto_out=generated proto/*.proto
-          touch generated/__init__.py  # Ensure it's a valid Python package
+          python -m grpc_tools.protoc -Iproto --python_betterproto_out=. proto/*.proto
+          touch __init__.py  # Ensure it's a valid Python package
       
       - name: Set PYTHONPATH
-        run: echo "PYTHONPATH=$(pwd):$(pwd)/generated" >> $GITHUB_ENV
+        run: echo "PYTHONPATH=$(pwd):$(pwd)" >> $GITHUB_ENV
 
       - name: Debug - Check if 'generated' is Importable
-        run: python -c "import generated; print('Generated module is importable!')"
+        run: python -c "import viuapi; print('Generated module is importable!')"
 
       - name: Generate API Documentation as README.md
         run: |
@@ -78,7 +76,7 @@ jobs:
           echo "" >> README.md
           echo "## Generated gRPC API" >> README.md
           echo '```python' >> README.md
-          pydoc-markdown --module generated > tmp.md
+          pydoc-markdown --module viuapi > tmp.md
           cat tmp.md | sed '/^ *$/d' >> README.md  # Remove empty lines
           echo '```' >> README.md
           rm tmp.md
