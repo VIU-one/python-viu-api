@@ -100,10 +100,10 @@ jobs:
           echo "# API Documentation" > README.md
           echo "" >> README.md
           echo "## Generated gRPC API" >> README.md
-          echo '```python' >> README.md
-          pydoc-markdown --module viuapi > tmp.md
+          echo '```' >> README.md  # <--- Remove backticks here
+          pydoc-markdown --module viuapi --render-toc > tmp.md  # Add --render-toc
           cat tmp.md | sed '/^ *$/d' >> README.md
-          echo '```' >> README.md
+          echo '```' >> README.md # <----  and here
           rm tmp.md
 
       - name: Commit and Push README
