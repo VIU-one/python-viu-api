@@ -109,15 +109,16 @@ jobs:
       - name: Debug - Check if 'generated' is Importable
         run: python -c "import viuapi; print('Generated module is importable!')"
 
-      - name: Generate API Documentation as README.md
+      - name: Install protoc-gen-doc
         run: |
-          echo "# API Documentation" > README.md
-          echo "" >> README.md
-          echo "## Generated gRPC API" >> README.md
-          pydoc-markdown --module viuapi --render-toc > tmp.md
-          cat tmp.md | sed '/^ *$/d' >> README.md  # Add content to README.md
-          rm tmp.md
+          # Example installation using go (you can use other methods)
+          go install github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc@latest
+          echo "$HOME/go/bin" >> $GITHUB_PATH # Add go/bin to PATH (if needed)
 
+      - name: Generate Documentation
+        run: |
+          mkdir -p docs
+          protoc -Iproto --doc_out=docs --doc_opt=markdown,README.md proto/viu-api.proto proto/jinaembed.proto
 
       - name: Clean Up (AGGRESSIVE!)
         run: rm -rf viuapi jinaembed viuapi.py jinaembed.py
