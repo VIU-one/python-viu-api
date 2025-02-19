@@ -69,9 +69,6 @@ jobs:
           git checkout main
           git pull origin main  # Get latest main
 
-      - name: Clean Up (AGGRESSIVE!)
-        run: rm -rf viuapi jinaembed *.py *.pyi README.md
-
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
@@ -120,6 +117,9 @@ jobs:
           pydoc-markdown --module viuapi --render-toc > tmp.md
           cat tmp.md | sed '/^ *$/d' >> README.md  # Add content to README.md
           rm tmp.md
+
+      - name: Clean Up (AGGRESSIVE!)
+        run: rm -rf viuapi jinaembed viuapi.py jinaembed.py
 
       - name: Debug - List Files (AFTER DOC GEN)
         run: ls -la
