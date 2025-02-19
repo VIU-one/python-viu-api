@@ -62,13 +62,13 @@ jobs:
         with:
           fetch-depth: 0  # Fetch entire history
 
-      - name: Switch to Main Branch
+      - name: Switch to Main Branch (BEFORE ANYTHING ELSE)
         run: |
           git checkout main
           git pull origin main  # Get latest main
 
-      - name: Clean Up (IMPORTANT!)
-        run: rm -rf viuapi jinaembed *.py *.pyi README.md # Remove README.md!
+      - name: Clean Up (AGGRESSIVE!)
+        run: rm -rf viuapi jinaembed *.py *.pyi README.md
 
       - name: Install Dependencies
         run: |
@@ -110,14 +110,14 @@ jobs:
           echo "# API Documentation" > README.md
           echo "" >> README.md
           echo "## Generated gRPC API" >> README.md
-          pydoc-markdown --module viuapi --render-toc > tmp.md  # Back to direct call
-          cat tmp.md | sed '/^ *$/d' >> README.md
+          pydoc-markdown --module viuapi --render-toc > tmp.md
+          cat tmp.md | sed '/^ *$/d' >> README.md  # Add content to README.md
           rm tmp.md
 
       - name: Commit and Push README
         run: |
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
-          git add README.md
+          git add README.md  # Add *AFTER* generating content
           git commit -m "Auto-update README with BetterProto API documentation" || echo "No changes to commit"
           git push origin main
