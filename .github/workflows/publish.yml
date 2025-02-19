@@ -84,13 +84,19 @@ jobs:
           touch viuapi/__init__.py
           touch jinaembed/__init__.py
 
-      - name: Move generated files to root and rename
+      - name: Move generated files to root
         run: |
           mv viuapi/viuapi.py .
           mv jinaembed/jinaembed.py .
 
+      - name: List Files (Debugging)
+        run: ls -la  # List all files in the current directory
+
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=.:$PYTHONPATH" >> $GITHUB_ENV
+
+      - name: Debug PYTHONPATH
+        run: echo "PYTHONPATH is: $PYTHONPATH"
 
       - name: Debug - Check if 'generated' is Importable
         run: python -c "import viuapi; print('Generated module is importable!')"
@@ -100,10 +106,8 @@ jobs:
           echo "# API Documentation" > README.md
           echo "" >> README.md
           echo "## Generated gRPC API" >> README.md
-          echo '```' >> README.md  # <--- Remove backticks here
-          pydoc-markdown --module viuapi --render-toc > tmp.md  # Add --render-toc
+          pydoc-markdown --module viuapi --render-toc > tmp.md
           cat tmp.md | sed '/^ *$/d' >> README.md
-          echo '```' >> README.md # <----  and here
           rm tmp.md
 
       - name: Commit and Push README
