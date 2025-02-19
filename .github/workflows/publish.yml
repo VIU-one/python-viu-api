@@ -60,12 +60,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Fetch entire history
 
-      - name: Switch to Main Branch
+      - name: Switch to Main Branch (BEFORE ANYTHING ELSE)
         run: |
           git checkout main
-          git pull origin main
+          git pull origin main  # Get latest main
+
+      - name: Clean Up (IMPORTANT!)
+        run: rm -rf viuapi jinaembed *.py *.pyi  # Remove any old generated files
 
       - name: Install Dependencies
         run: |
@@ -84,7 +87,7 @@ jobs:
           touch viuapi/__init__.py
           touch jinaembed/__init__.py
 
-      - name: Move generated files to root
+      - name: Move generated files to root and rename
         run: |
           mv viuapi/viuapi.py .
           mv jinaembed/jinaembed.py .
@@ -92,7 +95,7 @@ jobs:
       - name: Set PYTHONPATH and PATH
         run: |
           echo "PYTHONPATH=.:$PYTHONPATH" >> $GITHUB_ENV
-          echo "PATH=$HOME/.local/bin:$PATH" >> $GITHUB_ENV  # Add user bin to PATH
+          echo "PATH=$HOME/.local/bin:$PATH" >> $GITHUB_ENV
 
       - name: Debug PYTHONPATH and PATH
         run: |
@@ -107,7 +110,7 @@ jobs:
           echo "# API Documentation" > README.md
           echo "" >> README.md
           echo "## Generated gRPC API" >> README.md
-          pydoc-markdown --module viuapi --render-toc > tmp.md  # Call executable directly
+          pydoc-markdown --module viuapi --render-toc > tmp.md  # Back to direct call
           cat tmp.md | sed '/^ *$/d' >> README.md
           rm tmp.md
 
