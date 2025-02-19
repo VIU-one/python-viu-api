@@ -33,18 +33,20 @@ jobs:
 
       - name: Generate gRPC Code
         run: |
-          python -m grpc_tools.protoc -Iproto --python_betterproto_out=viuapi proto/viu-api.proto
-          python -m grpc_tools.protoc -Iproto --python_betterproto_out=jinaembed proto/jinaembed.proto
+          python -m grpc_tools.protoc -Iproto --python_betterproto_out=viuapi --pyi_out=viuapi proto/viu-api.proto
+          python -m grpc_tools.protoc -Iproto --python_betterproto_out=jinaembed --pyi_out=jinaembed proto/jinaembed.proto
           touch viuapi/__init__.py
           touch jinaembed/__init__.py
 
       - name: Move generated files to root and rename
         run: |
           mv viuapi/viuapi.py .
+          mv viuapi/viuapi.pyi .  # Keep the .pyi file!
           mv jinaembed/jinaembed.py .
+          mv jinaembed/jinaembed.pyi . # Keep the .pyi file!
 
       - name: Build package
-        run: python setup.py sdist bdist_wheel
+        run: python setup.py sdist bdist_wheel  # Assuming you have a setup.py
 
       - name: Publish to PyPI
         env:
@@ -67,8 +69,8 @@ jobs:
           git checkout main
           git pull origin main  # Get latest main
 
-      - name: Clean Up
-        run: rm -rf viuapi jinaembed *.py *.pyi  # Don't remove README.md *yet*
+      - name: Clean Up (AGGRESSIVE!)
+        run: rm -rf viuapi jinaembed *.py *.pyi README.md
 
       - name: Install Dependencies
         run: |
@@ -82,15 +84,17 @@ jobs:
 
       - name: Generate gRPC Code
         run: |
-          python -m grpc_tools.protoc -Iproto --python_betterproto_out=viuapi proto/viu-api.proto
-          python -m grpc_tools.protoc -Iproto --python_betterproto_out=jinaembed proto/jinaembed.proto
+          python -m grpc_tools.protoc -Iproto --python_betterproto_out=viuapi --pyi_out=viuapi proto/viu-api.proto
+          python -m grpc_tools.protoc -Iproto --python_betterproto_out=jinaembed --pyi_out=jinaembed proto/jinaembed.proto
           touch viuapi/__init__.py
           touch jinaembed/__init__.py
 
       - name: Move generated files to root and rename
         run: |
           mv viuapi/viuapi.py .
+          mv viuapi/viuapi.pyi .
           mv jinaembed/jinaembed.py .
+          mv jinaembed/jinaembed.pyi .
 
       - name: Set PYTHONPATH and PATH
         run: |
