@@ -1,4 +1,4 @@
-name: Publish Python Package
+me: Publish Python Package
 
 on:
   release:
@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel
-          pip install twine "betterproto[compiler]" betterproto grpcio grpcio-tools
+          python -m pip install twine "betterproto[compiler]" betterproto grpcio==1.59.0 grpcio-tools==1.59.0 #downgraded
 
       - name: Create Package Directories
         run: |
@@ -33,17 +33,15 @@ jobs:
 
       - name: Generate gRPC Code
         run: |
-          python -m grpc_tools.protoc -Iproto --python_betterproto_out=viuapi --pyi_out=viuapi proto/viu-api.proto
-          python -m grpc_tools.protoc -Iproto --python_betterproto_out=jinaembed --pyi_out=jinaembed proto/jinaembed.proto
+          python -m grpc_tools.protoc -Iproto --python_betterproto_out=viuapi --betterproto_out=viuapi proto/viu-api.proto
+          python -m grpc_tools.protoc -Iproto --python_betterproto_out=jinaembed --betterproto_out=jinaembed proto/jinaembed.proto
           touch viuapi/__init__.py
           touch jinaembed/__init__.py
 
       - name: Move generated files to root and rename
         run: |
           mv viuapi/viuapi.py .
-          mv viuapi/viuapi.pyi .  # Correct path
           mv jinaembed/jinaembed.py .
-          mv jinaembed/jinaembed.pyi .  #Correct path
 
       - name: Build package
         run: python setup.py sdist bdist_wheel  # Assuming you have a setup.py
@@ -69,10 +67,13 @@ jobs:
           git checkout main
           git pull origin main  # Get latest main
 
+      - name: Clean Up (AGGRESSIVE!)
+        run: rm -rf viuapi jinaembed *.py *.pyi README.md
+
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install "betterproto[compiler]" betterproto grpcio grpcio-tools pydoc-markdown
+          python -m pip install "betterproto[compiler]" betterproto grpcio==1.59.0 grpcio-tools==1.59.0 pydoc-markdown #downgraded
 
       - name: Create Package Directories
         run: |
@@ -81,34 +82,21 @@ jobs:
 
       - name: Generate gRPC Code
         run: |
-          python -m grpc_tools.protoc -Iproto --python_betterproto_out=viuapi --pyi_out=viuapi proto/viu-api.proto
-          python -m grpc_tools.protoc -Iproto --python_betterproto_out=jinaembed --pyi_out=jinaembed proto/jinaembed.proto
+          python -m grpc_tools.protoc -Iproto --python_betterproto_out=viuapi --betterproto_out=viuapi proto/viu-api.proto
+          python -m grpc_tools.protoc -Iproto --python_betterproto_out=jinaembed  --betterproto_out=jinaembed proto/jinaembed.proto
           touch viuapi/__init__.py
           touch jinaembed/__init__.py
 
       - name: Move generated files to root and rename
         run: |
           mv viuapi/viuapi.py .
-          mv viuapi/viuapi.pyi .
           mv jinaembed/jinaembed.py .
-          mv jinaembed/jinaembed.pyi .
 
       - name: Set PYTHONPATH and PATH
         run: |
           echo "PYTHONPATH=.:$PYTHONPATH" >> $GITHUB_ENV
           echo "PATH=$HOME/.local/bin:$PATH" >> $GITHUB_ENV
-
-      - name: Debug - List Files (BEFORE ANYTHING)
-        run: ls -la
-
-      - name: Debug PYTHONPATH and PATH
-        run: |
-          echo "PYTHONPATH is: $PYTHONPATH"
-          echo "PATH is: $PATH"
-
-      - name: Debug - Check if 'generated' is Importable
-        run: python -c "import viuapi; print('Generated module is importable!')"
-
+      
       - name: Generate API Documentation as README.md
         run: |
           echo "# API Documentation" > README.md
@@ -118,18 +106,6 @@ jobs:
           cat tmp.md | sed '/^ *$/d' >> README.md  # Add content to README.md
           rm tmp.md
 
-      - name: Clean Up (AGGRESSIVE!)
-        run: rm -rf viuapi jinaembed viuapi.py jinaembed.py
-
-      - name: Debug - List Files (AFTER DOC GEN)
-        run: ls -la
-
-      - name: Debug - Show README Content
-        run: cat README.md
-
-      - name: Debug - Git Status (Before Commit)
-        run: git status
-
       - name: Commit and Push README
         run: |
           git config --global user.email "github-actions@github.com"
@@ -137,6 +113,3 @@ jobs:
           git add .  # Add *ALL* changes, including the README
           git commit -m "Auto-update README with BetterProto API documentation" || echo "No changes to commit"
           git push origin main
-
-      - name: Debug - Git Status (After Commit)
-        run: git status
