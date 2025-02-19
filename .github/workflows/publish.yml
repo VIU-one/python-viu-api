@@ -70,7 +70,7 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install "betterproto[compiler]" betterproto grpcio grpcio-tools pydoc-markdown
+          python -m pip install "betterproto[compiler]" betterproto grpcio grpcio-tools pydoc-markdown
 
       - name: Create Package Directories
         run: |
@@ -90,15 +90,13 @@ jobs:
           mv jinaembed/jinaembed.py .
 
       - name: List Files (Debugging)
-        run: ls -la  # List all files in the current directory
+        run: ls -la
 
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=.:$PYTHONPATH" >> $GITHUB_ENV
 
       - name: Debug PYTHONPATH
-        run: |
-          echo "PYTHONPATH is:"
-          echo $PYTHONPATH
+        run: echo "PYTHONPATH is: $PYTHONPATH"
 
       - name: Debug - Check if 'generated' is Importable
         run: python -c "import viuapi; print('Generated module is importable!')"
@@ -108,7 +106,7 @@ jobs:
           echo "# API Documentation" > README.md
           echo "" >> README.md
           echo "## Generated gRPC API" >> README.md
-          pydoc-markdown --module viuapi --render-toc > tmp.md
+          python -m pydoc_markdown --module viuapi --render-toc > tmp.md  # Use python -m
           cat tmp.md | sed '/^ *$/d' >> README.md
           rm tmp.md
 
