@@ -67,8 +67,8 @@ jobs:
           git checkout main
           git pull origin main  # Get latest main
 
-      - name: Clean Up (AGGRESSIVE!)
-        run: rm -rf viuapi jinaembed *.py *.pyi README.md
+      - name: Clean Up
+        run: rm -rf viuapi jinaembed *.py *.pyi  # Don't remove README.md *yet*
 
       - name: Install Dependencies
         run: |
@@ -130,7 +130,7 @@ jobs:
         run: |
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
-          git add README.md  # Add *AFTER* generating content
+          git add .  # Add *ALL* changes, including the README
           git commit -m "Auto-update README with BetterProto API documentation" || echo "No changes to commit"
           git push origin main
 
