@@ -44,7 +44,7 @@ jobs:
           mv jinaembed/jinaembed.py .
 
       - name: Build package
-        run: python setup.py sdist bdist_wheel  # Assuming you have a setup.py
+        run: python setup.py sdist bdist_wheel
 
       - name: Publish to PyPI
         env:
@@ -97,6 +97,9 @@ jobs:
           echo "PYTHONPATH=.:$PYTHONPATH" >> $GITHUB_ENV
           echo "PATH=$HOME/.local/bin:$PATH" >> $GITHUB_ENV
 
+      - name: Debug - List Files (BEFORE ANYTHING)
+        run: ls -la
+
       - name: Debug PYTHONPATH and PATH
         run: |
           echo "PYTHONPATH is: $PYTHONPATH"
@@ -114,6 +117,15 @@ jobs:
           cat tmp.md | sed '/^ *$/d' >> README.md  # Add content to README.md
           rm tmp.md
 
+      - name: Debug - List Files (AFTER DOC GEN)
+        run: ls -la
+
+      - name: Debug - Show README Content
+        run: cat README.md
+
+      - name: Debug - Git Status (Before Commit)
+        run: git status
+
       - name: Commit and Push README
         run: |
           git config --global user.email "github-actions@github.com"
@@ -121,3 +133,6 @@ jobs:
           git add README.md  # Add *AFTER* generating content
           git commit -m "Auto-update README with BetterProto API documentation" || echo "No changes to commit"
           git push origin main
+
+      - name: Debug - Git Status (After Commit)
+        run: git status
