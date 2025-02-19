@@ -62,13 +62,13 @@ jobs:
         with:
           fetch-depth: 0  # Fetch entire history
 
-      - name: Switch to Main Branch (BEFORE ANYTHING ELSE)
+      - name: Switch to Main Branch
         run: |
           git checkout main
           git pull origin main  # Get latest main
 
       - name: Clean Up (IMPORTANT!)
-        run: rm -rf viuapi jinaembed *.py *.pyi  # Remove any old generated files
+        run: rm -rf viuapi jinaembed *.py *.pyi README.md # Remove README.md!
 
       - name: Install Dependencies
         run: |
