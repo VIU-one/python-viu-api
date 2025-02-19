@@ -98,7 +98,7 @@ jobs:
       - name: Debug PYTHONPATH
         run: |
           echo "PYTHONPATH is"
-          echo $PYTHONPATH"
+          echo $PYTHONPATH
 
       - name: Debug - Check if 'generated' is Importable
         run: python -c "import viuapi; print('Generated module is importable!')"
