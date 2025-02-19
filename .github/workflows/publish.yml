@@ -33,8 +33,8 @@ jobs:
 
       - name: Generate gRPC Code
         run: |
-          python -m grpc_tools.protoc -Iproto --python_betterproto_out=viuapi --pyi_out=viuapi proto/viu-api.proto
-          python -m grpc_tools.protoc -Iproto --python_betterproto_out=jinaembed --pyi_out=jinaembed proto/jinaembed.proto
+          python -m grpc_tools.protoc -Iproto --python_betterproto_out=viuapi proto/viu-api.proto
+          python -m grpc_tools.protoc -Iproto --python_betterproto_out=jinaembed proto/jinaembed.proto
           touch viuapi/__init__.py
           touch jinaembed/__init__.py
 
