@@ -41,9 +41,9 @@ jobs:
       - name: Move generated files to root and rename
         run: |
           mv viuapi/viuapi.py .
-          mv viuapi/viuapi.pyi .  # Keep the .pyi file!
+          mv viuapi/viuapi.pyi .  # Correct path
           mv jinaembed/jinaembed.py .
-          mv jinaembed/jinaembed.pyi . # Keep the .pyi file!
+          mv jinaembed/jinaembed.pyi .  #Correct path
 
       - name: Build package
         run: python setup.py sdist bdist_wheel  # Assuming you have a setup.py
