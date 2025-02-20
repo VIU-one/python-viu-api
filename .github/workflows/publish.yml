@@ -1,130 +1,79 @@
-name: Publish Python gRPC Client
+name: CI for Proto API Client Library
 
 on:
   push:
-    branches:
-      - main  # Trigger on pushes to main
-    tags:
-      - 'v*'  # Trigger on tags starting with 'v' (e.g., v1.0.0, v2.0.1)
-  workflow_dispatch: # allow manually triggered workflow
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ published ]
 
 jobs:
-  build-test:
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
-
+        python-version: [3.9, 3.10, 3.11]
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install build twine  # For building and publishing
-          python -m pip install "betterproto[compiler]"  # For code generation
-          python -m pip install pytest pytest-asyncio # for running tests
-
-      - name: Install System Dependencies
-        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
-
-      - name: Generate gRPC Code
-        run: |
-          mkdir -p src/my_client_lib  # Create a source directory
-          python -m grpc_tools.protoc -Iproto --python_betterproto_out=src/my_client_lib proto/*.proto  # Generate into src
-          touch src/my_client_lib/__init__.py
-
-      - name: Run Tests
-        run: pytest tests/
-
-      - name: Build package
-        run: python -m build
-
-  publish:
-    needs: build-test
-    runs-on: ubuntu-latest
-    # Only run the publish job when a tag is pushed
-    if: startsWith(github.ref, 'refs/tags/v')
-    environment:
-      name: pypi
-      url: https://pypi.org/p/my-client-lib  # Replace with your package name
-    permissions:
-      id-token: write  # IMPORTANT: use OIDC for PyPI publishing
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
         with:
-          python-version: "3.10" # a single python version is enough to publish
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install build twine
-
-      - name: Build package
-        run: python -m build
-
-      - name: Publish package to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        # No TWINE_USERNAME or TWINE_PASSWORD needed!
-
-
-  generate-docs:
-    needs: build-test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'  # Only generate docs on pushes to main
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Fetch all history for git
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10" # a single python version is enough
-
-      - name: Install System Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y protobuf-compiler
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ matrix.python-version }}-
 
       - name: Install Dependencies
         run: |
-          python -m pip install "betterproto[compiler]"
-          go install github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc@latest
+          python -m pip install --upgrade pip setuptools wheel
+          # Install proto tools, betterproto, and test framework
+          pip install grpcio grpcio-tools "betterproto[compiler]" pytest
 
-      - name: Setup Go
-        uses: actions/setup-go@v4  # Set up Go for protoc-gen-doc
+      - name: Generate gRPC Client Code
+        run: |
+          # Create dedicated folders for generated code
+          mkdir -p generated/viuapi generated/jinaembed
+          python -m grpc_tools.protoc -I proto --python_betterproto_out=generated/viuapi proto/viu-api.proto
+          python -m grpc_tools.protoc -I proto --python_betterproto_out=generated/jinaembed proto/jinaembed.proto
+          # Ensure packages are recognized
+          touch generated/viuapi/__init__.py generated/jinaembed/__init__.py
+
+      - name: Run Tests
+        env:
+          # If your tests need to import the generated modules, add them to PYTHONPATH
+          PYTHONPATH: ${{ github.workspace }}/generated
+        run: pytest --maxfail=1 --disable-warnings -q
+
+  publish:
+    if: github.event_name == 'release'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python for Publishing
+        uses: actions/setup-python@v4
         with:
-          go-version: '1.21'   # Or a specific Go version you need
+          python-version: "3.10"
 
-      - name: Generate gRPC Code
+      - name: Install Build & Publish Tools
         run: |
-          mkdir -p src/my_client_lib  # Create a source directory
-          python -m grpc_tools.protoc -Iproto --python_betterproto_out=src/my_client_lib proto/*.proto  # Generate into src
-          touch src/my_client_lib/__init__.py
+          python -m pip install --upgrade pip setuptools wheel build twine
 
-      - name: Generate Documentation
-        run: |
-          mkdir -p docs
-          protoc -Iproto --doc_out=docs --doc_opt=markdown,README.md proto/*.proto
+      - name: Build Distribution
+        run: python -m build
 
-      - name: Commit and Push Documentation
-        run: |
-          git config --global user.name "GitHub Actions Bot"
-          git config --global user.email "actions@github.com"
-          git add docs/README.md
-          git commit -m "chore: update generated documentation" || echo "No changes to commit"
-          git push origin main
+      - name: Publish to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: twine upload dist/*
