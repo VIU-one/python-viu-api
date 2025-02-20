@@ -31,8 +31,10 @@ jobs:
 
       - name: Generate gRPC Code (Directly to Root)
         run: |
-          python -m grpc_tools.protoc -Iproto --python_betterproto_out=. proto/jinaembed.proto
-          python -m grpc_tools.protoc -Iproto --python_betterproto_out=. proto/viu-api.proto
+          python -m grpc_tools.protoc -Iproto --python_betterproto_out=viuapi proto/viu-api.proto
+          python -m grpc_tools.protoc -Iproto --python_betterproto_out=jinaembed proto/jinaembed.proto
+          touch viuapi/__init__.py
+          touch jinaembed/__init__.py
 
       - name: Build package
         run: python setup.py sdist bdist_wheel  # Assuming you have a setup.py
@@ -72,8 +74,10 @@ jobs:
 
       - name: Generate gRPC Code (Directly to Root)
         run: |
-          python -m grpc_tools.protoc -Iproto --python_betterproto_out=. proto/jinaembed.proto
-          python -m grpc_tools.protoc -Iproto --python_betterproto_out=. proto/viu-api.proto
+          python -m grpc_tools.protoc -Iproto --python_betterproto_out=viuapi proto/viu-api.proto
+          python -m grpc_tools.protoc -Iproto --python_betterproto_out=jinaembed proto/jinaembed.proto
+          touch viuapi/__init__.py
+          touch jinaembed/__init__.py
 
       - name: Set PYTHONPATH and PATH (Using GITHUB_ENV)
         run: |
