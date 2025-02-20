@@ -1,10 +1,10 @@
 name: Build, Generate Client, and Publish to PyPI
 
 on:
-  # This workflow runs when you push a new version tag (e.g. v1.2.3)
-  push:
+  release:
+    types: [published]
     tags:
-      - 'v*.*.*'
+      - "live-*"
 
 jobs:
   build-and-publish:
