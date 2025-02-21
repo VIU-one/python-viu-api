@@ -29,14 +29,14 @@ jobs:
 
       - name: Generate Python client code from proto files
         run: |
-          # Create the output directory (named "client") if it doesn't exist.
-          mkdir -p client
+          # Create the output directory (named "src/python_viu_api") if it doesn't exist.
+          mkdir -p src
+          mkdir -p python_viu_api
           # Generate the Python files from both proto files.
           # The -I flag sets the proto import path so that included files are resolved correctly.
-          python -m grpc_tools.protoc -I proto --python_out=client --grpc_python_out=client proto/jinaembed.proto proto/viu-api.proto
-          # Ensure the generated folder is a Python package.
-          touch client/__init__.py
-
+          python -m grpc_tools.protoc -Iproto --python_betterproto_out=src/python_viu_api proto/*.proto
+          touch src/python_viu_api/__init__.py  # Make sure __init__.py exists
+          
       - name: Create README.md for client usage
         run: |
           cat << 'EOF' > README.md
@@ -50,7 +50,7 @@ jobs:
           Install the package using pip:
 
           ```bash
-          pip install your-package-name
+          pip install python-viu-api
           ```
 
           ## Usage
@@ -58,7 +58,7 @@ jobs:
           Import the generated modules in your Python code:
 
           ```python
-          from client import jinaembed_pb2, viu_api_pb2, viu_api_pb2_grpc
+          from python_viu_api import jinaembed_pb2, viu_api_pb2, viu_api_pb2_grpc
           import grpc
 
           # Example: Create a request for Jina embeddings
