@@ -30,8 +30,7 @@ jobs:
       - name: Generate Python client code from proto files
         run: |
           # Create the output directory (named "src/python_viu_api") if it doesn't exist.
-          mkdir -p src
-          mkdir -p python_viu_api
+          mkdir -p src/python_viu_api 
           # Generate the Python files from both proto files.
           # The -I flag sets the proto import path so that included files are resolved correctly.
           python -m grpc_tools.protoc -Iproto --python_betterproto_out=src/python_viu_api proto/*.proto
