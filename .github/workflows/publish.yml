@@ -19,23 +19,20 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Extract Version from Tag  
+      - name: Extract Version from Tag
         run: echo "PACKAGE_VERSION=$(echo ${GITHUB_REF#refs/tags/live-})" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install grpcio grpcio-tools build twine wheel "betterproto[compiler]" betterproto
+          pip install grpcio grpcio-tools build twine wheel
 
       - name: Generate Python client code from proto files
         run: |
-          # Create the output directory (named "src/python_viu_api") if it doesn't exist.
-          mkdir -p src/python_viu_api 
-          # Generate the Python files from both proto files.
-          # The -I flag sets the proto import path so that included files are resolved correctly.
-          python -m grpc_tools.protoc -Iproto --python_betterproto_out=src/python_viu_api proto/*.proto
-          touch src/python_viu_api/__init__.py  # Make sure __init__.py exists
-          
+          mkdir -p src/python_viu_api
+          python -m grpc_tools.protoc -Iproto --python_out=src/python_viu_api --grpc_python_out=src/python_viu_api proto/*.proto
+          touch src/python_viu_api/__init__.py  # Ensure the module is importable
+
       - name: Create README.md for client usage
         run: |
           cat << 'EOF' > README.md
@@ -85,11 +82,10 @@ jobs:
           EOF
 
       - name: Build package
-        run: python setup.py sdist bdist_wheel  # Assuming you have a setup.py
-    
+        run: python setup.py sdist bdist_wheel  # Make sure setup.py correctly packages generated files
+
       - name: Publish to PyPI
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: twine upload dist/*
-  
