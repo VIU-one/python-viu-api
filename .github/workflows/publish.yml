@@ -31,7 +31,8 @@ jobs:
         run: |
           mkdir -p src/python_viu_api
           python -m grpc_tools.protoc -Iproto --python_out=src/python_viu_api --grpc_python_out=src/python_viu_api proto/*.proto
-          touch src/python_viu_api/__init__.py  # Ensure the module is importable
+          sed -i 's/import viu_api_pb2 as/from . import viu_api_pb2 as/' src/python_viu_api/viu_api_pb2_grpc.py
+          touch src/python_viu_api/__init__.py
 
       - name: Create README.md for client usage
         run: |
